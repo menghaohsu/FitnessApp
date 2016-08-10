@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/html">
 <head>
     <title>JavaScript Motion Detection</title>
@@ -21,141 +22,75 @@
 
         <div id="hotSpots">
 
-            <div id="one">
-                <audio
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233116497/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                  
-                </audio>
+            <div id="one" class='loop'>
             </div>
 
-            <div id="two">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233116232/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                   
-                </audio>
+            <div id="two" class='loop'>
             </div>
 
-            <div id="three">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233116037/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="three" class='loop'>
             </div>
 
-            <div id="four">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233134796/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                
-                </audio>
+            <div id="four" class='loop'>
             </div>
 
-            <div id="five">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233134783/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <p id="timer">Timer here
+            </p>
+
+            <div id="five" class='loop'>
             </div>
 
-            <div id="six">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233143259/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="six" class='loop'>
             </div>
 
-            <div id="seven">
-                <audio src="https://api.soundcloud.com/tracks/233127044/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"></audio>
+            <div id="seven" class='loop'>
             </div>
 
-            <div id="eight">
-                <audio src="https://api.soundcloud.com/tracks/233135073/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"></audio>
+            <div id="eight" class='loop'>
             </div>
 
-            <div id="nine">
-                <audio src="https://api.soundcloud.com/tracks/233135087/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"></audio>
+            <div id="nine" class='loop'>          
             </div>
 
-            <div id="ten">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233135329/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="ten" class='loop'>
             </div>
 
-            <div id="eleven">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233143227/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="eleven" class='loop'>
             </div>
 
-            <div id="twelve">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233143239/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="twelve" class='loop'>
             </div>
 
-            <div id="thirteen">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233141894/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="thirteen" class='loop'>
             </div>
 
-            <div id="fourteen">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233141877/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="fourteen" class='loop'>
             </div>
 
-            <div id="fifteen">
-                <audio 
-                    class="loop" 
-                    loop
-                    src= "https://api.soundcloud.com/tracks/233141859/stream?client_id=0b6cfb2f09b2bc8c0345d9579914a1b9"
-                    muted="true">                 
-                </audio>
+            <div id="fifteen" class='loop'>
             </div>
+<!-- 
+            <div id="sixteen" class='loop'>
+            </div> -->
 
-            <div id="faster"></div>
-            <div id="slower"></div>
-            <div id="pause"></div>
-                
+            <button onclick='tryOne()' id="tryOne" class='loop'>Try One!
+            </button>
+
+            <button onclick='unbind()' id="stop" class='loop'>Stop!
+            </button>
+
+            <button onclick='start()' id="start" class='loop'>Start!
+            </button>
+
+            <button onclick='ready()' id="ready" class='loop'>Get Ready!
+            </button>
         </div>
-    </div>
 
 
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="js/motionSensing.js"></script>
-<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
-<script src="/js/soundcloud.js"></script>
 <script src="js/listeners.js"></script>
-
 </body>
 </html>

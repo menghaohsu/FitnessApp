@@ -1,210 +1,379 @@
 // This file is where we handle all the motion responses
-
-// Start all loop audios playing (they are muted by default)
 var loopers = document.getElementsByClassName('loop');
-setTimeout(function() {
-	for (var i = 0; i < loopers.length; i++) {
-		loopers[i].play();
-	}
-}, 2000);
-
-// These are some nice variables that we use in our logic below
-var fresh = true;
-var oneDisabled = false;
-var twoDisabled = false;
-var threeDisabled = false;
-var fourDisabled = false;
-var fiveDisabled = false;
-var sixDisabled = false;
-var sevenDisabled = false;
-var eightDisabled = false;
-var nineDisabled = false;
-var tenDisabled = false;
-var elevenDisabled = false;
-var twelveDisabled = false;
-var thirteenDisabled = false;
-var fourteenDisabled = false;
-var fifteenDisabled = false;
-var pauseDisabled = false;
-var rate = 1;
 var allPaused = false;
-var isPlaying = [];
+var allMotion =[];
+var initialState =[];
+var standard =[];
+var attempt=0
+var dynamicAttempt=4;
+var timer = document.getElementById("timer");
+var newElement = document.createElement('p');
+var counter = 0
 
-// In 3 seconds, register all the motion listeners
-setTimeout(registerListeners, 3000);
-
-// If it's muted, turn muted on and push into 'isPlaying' memory. Otherwise, mute it and remove it from 'isPlaying'
-function playLoop(element) {
-	if (fresh) {
-		for (var i = 0; i < loopers.length; i++) {
-			loopers[i].play();
-		}
-		fresh = false;
-	}
-	if (allPaused) return;
-	// if nothing's playing, start metronome again
-	var audio = element.getElementsByTagName('audio')[0];
-	if (isPlaying.indexOf(audio) < 0) {
-		audio.muted = false;
-		isPlaying.push(audio);
-		$('#'+ element.id).css('borderColor', '#6131bc');
-	} else {
-		audio.muted = true;
-		var index = isPlaying.indexOf(audio);
-		isPlaying.splice(index,1);
-		if (!isPlaying.length) {
-			for (var i = 0; i < loopers.length; i++) {
-				loopers[i].pause();
-				loopers[i].currentTime = 0;
-			}
-			fresh = true;
-		}
-		$('#'+ element.id).css('borderColor', '#fff');
-	}
+function ready(){
+	unbind();
+	setTimer('ready',initialState)
 }
 
-// Go back to time 0 and play. Used for nonlooping audio elements with fixed playbackRate. 
-function playOnce(element) {
-	var audio = element.getElementsByTagName('audio')[0];
-	audio.currentTime = 0;
-	audio.play();
+function start(){	
+	unbind();
+	attempt = prompt("How many push up do you want to do this time?");
+	setTimer('start',allMotion)
 }
 
-// Mutes / unmutes all audios that were playing
-function pauseAll() {
-	if (!allPaused) {
-		for (var i = 0; i < loopers.length; i++) { 
-			loopers[i].pause();
-		}
-		$('#pause').css('borderColor', '#b71f1f');
-	} else {
-		for (var j = 0; j < loopers.length; j++) {
-			loopers[j].play();
-		}
-		$('#pause').css('borderColor', '#fff');
-	}
-	allPaused = !allPaused;
+function tryOne(){
+	unbind();
+	setTimer('tryOne',standard)
+	
+}
+
+function setTimer(state,stateArr){
+	counter = 3
+	var id;
+	newElement.innerHTML = "Start in 3 sec"
+	timer.parentNode.replaceChild(newElement, timer);
+	id = setInterval(function() {
+	    counter--;
+	    if(counter < 0) {
+	    	registerListeners(state,stateArr);
+	    	newElement.parentNode.replaceChild(timer, newElement);
+	        clearInterval(id);
+	    } else {
+	        newElement.innerHTML = "Start in " + counter.toString() + " sec";
+	    }
+	}, 1000);
 }
 
 
-function registerListeners(){
+function checkInitial(arr){
+	var incorrect = 0;
+	arr.forEach(function(position){
+		if(initialState.indexOf(position)===-1) incorrect++;
+	})
+	if(incorrect<=1) return true;
+	else return false;
+}
+
+function checkEveryMotion(arr){
+	var incorrect =0;
+	for(var i=0; i<arr.length; i++){
+		if(initialState.indexOf(arr[i])!==-1) arr.splice(i,1);
+		else if(standard.indexOf(arr[i])===-1||Math.abs(standard.indexOf(arr[i])-i)>1){
+			incorrect++;
+		}
+	}
+	if(incorrect<=1) return true;
+	else return false;
+}
+
+//unbind all the censor
+function unbind(state){
+		$('.loop').unbind('motion');
+		if(state==='ready'){
+			return finish(initialState,state)
+		}else if(state==='tryOne'){
+			return finish(standard,state)
+		}else if(state==='tryAgain'){
+			alert('Please try again')
+		}
+}
+
+function unbindAll(){
+	$('.loop').unbind('motion');
+}
+
+function finish(arr,type){
+	var name = prompt("Please enter your name");
+	var obj = {arr:arr,name:name,type:type}
+	$.ajax({
+		url:'/',
+		type:'POST',
+		data: obj,
+		success: function(){
+            console.log('Saved!!!');
+        }
+	});
+}
+
+function registerListeners(state,arr){
 
 	// consider using a debounce utility if you get too many consecutive events
 	$(window).on('motion', function(ev, data){
 		// console.log('detected motion at', new Date(), 'with data:', data);
 		var spot = $(data.spot.el);
-		spot.addClass('active');
+		spot.addClass('active');	
 		setTimeout(function(){
 			spot.removeClass('active');
-		}, 230);
+		}, 1000);	
 	});
 
 	function sendToLoop(element, theRightOne) {
-		if (window[theRightOne]) return;
-		window[theRightOne] = true;
-		playLoop(element);
-		setTimeout(function() {
-			window[theRightOne] = false;
-		}, 500);
+		if(state==='ready'){
+			if (window[theRightOne]) return;
+			if(arr.indexOf(theRightOne)!==-1) return;
+				arr.push(theRightOne);			
+				window[theRightOne] = true;
+				if(arr.length>=4){
+					unbind(state);
+				}
+				setTimeout(function() {
+					window[theRightOne] = false;
+				}, 1000);
+		}else if(state==='tryOne'){
+			if (window[theRightOne]) return;
+			arr.push(theRightOne)
+			if(arr.length>=7&&checkInitial(arr.slice(-initialState.length))){
+				unbind(state);
+			}else if(arr.length>15){
+				console.log(arr);
+				unbind('tryAgain')
+				standard=[];
+			}	
+			window[theRightOne] = true;
+			setTimeout(function() {
+				window[theRightOne] = false;
+			}, 1000);		
+		}else if(state==='start'){
+			timer.innerHTML = 'Great! '+ attempt + ' left!'
+			if (window[theRightOne]) return;
+			arr.push(theRightOne)
+			if(arr.length>dynamicAttempt+10) {
+				alert("Dont be lazy!");	
+				unbindAll();
+				setTimeout(function(){
+					registerListeners(state,allMotion);
+				},1500)	
+				dynamicAttempt=arr.length;			
+			}else if(arr.length>=(dynamicAttempt+5)&&checkInitial(arr.slice(-initialState.length))){
+				if(dynamicAttempt===4||checkEveryMotion(arr.slice(dynamicAttempt))) {
+					attempt--;
+					if(attempt===0){
+						timer.innerHTML = 'Congradulation! you finished!'
+						alert('Count!! Congradulation you finished!');
+						dynamicAttempt=4;
+						allMotion=[];
+						unbind(state);
+					}else {
+						timer.innerHTML = 'Great! '+ attempt + ' left!';
+						alert('Great! '+ attempt + ' left!');
+						unbindAll();
+						setTimeout(function(){
+							registerListeners(state,allMotion);
+						},1500)	
+					}
+
+				}
+				else {
+					alert("Dont be lazy!")
+					unbindAll();	
+					setTimeout(function(){
+						registerListeners(state,allMotion);
+					},1500)	
+				}	
+				dynamicAttempt=arr.length;					
+			}
+			
+			window[theRightOne] = true;
+			setTimeout(function() {
+				window[theRightOne] = false;
+			}, 1000);
+		}	
 	}
+		// examples for id usage (can use a class as well, if want multiple elements to respond)
+		$('#one').bind('motion', function(){
+			sendToLoop(this, 1);
+		});
 
-	function sendToPlayOnce(element, theRightOne) {
-		if (window[theRightOne]) return;
-		window[theRightOne] = true;
-		playOnce(element);
-		setTimeout(function() {
-			window[theRightOne] = false;
-		}, 200);
-	}
 
-	// examples for id usage (can use a class as well, if want multiple elements to respond)
-	$('#one').on('motion', function(){
-		sendToLoop(this, 'oneDisabled');
-	});
+		$('#two').bind('motion', function(){
+			sendToLoop(this, 2);
+		});
 
-	$('#two').on('motion', function(){
-		sendToLoop(this, 'twoDisabled');
-	});
+		$('#three').bind('motion', function(){
+			sendToLoop(this, 3);
+		});
 
-	$('#three').on('motion', function(){
-		sendToLoop(this, 'threeDisabled');
-	});
+		$('#four').bind('motion', function(){
+			sendToLoop(this, 4);
+		});
 
-	$('#four').on('motion', function(){
-		sendToLoop(this, 'fourDisabled');
-	});
+		$('#five').bind('motion', function(){
+			sendToLoop(this, 5);
+		});
 
-	$('#five').on('motion', function(){
-		sendToLoop(this, 'fiveDisabled');
-	});
+		$('#six').bind('motion', function(){
+			sendToLoop(this, 6);
+		});
 
-	$('#six').on('motion', function(){
-		sendToLoop(this, 'sixDisabled');
-	});
+		$('#seven').bind('motion', function(){
+			sendToLoop(this, 7);
+		});
 
-	$('#seven').on('motion', function(){
-		sendToPlayOnce(this, 'sevenDisabled');
-	});
+		$('#eight').bind('motion', function(){
+			sendToLoop(this, 8);
+		});
 
-	$('#eight').on('motion', function(){
-		sendToPlayOnce(this, 'eightDisabled');
-	});
+		$('#nine').bind('motion', function(){
+			sendToLoop(this, 9);
+		});
 
-	$('#nine').on('motion', function(){
-		sendToPlayOnce(this, 'nineDisabled');
-	});
+		$('#ten').bind('motion', function(){
+			sendToLoop(this, 10);
+		});
 
-	$('#ten').on('motion', function(){
-		sendToLoop(this, 'tenDisabled');
-	});
+		$('#eleven').bind('motion', function(){
+			sendToLoop(this, 11);
+		});
 
-	$('#eleven').on('motion', function(){
-		sendToLoop(this, 'elevenDisabled');
-	});
+		$('#twelve').bind('motion', function(){
+			sendToLoop(this, 12);
+		});
 
-	$('#twelve').on('motion', function(){
-		sendToLoop(this, 'twelveDisabled');
-	});
+		$('#thirteen').bind('motion', function(){
+			sendToLoop(this, 13);
+		});
 
-	$('#thirteen').on('motion', function(){
-		sendToLoop(this, 'thirteenDisabled');
-	});
+		$('#fourteen').bind('motion', function(){
+			sendToLoop(this, 14);
+		});
 
-	$('#fourteen').on('motion', function(){
-		sendToLoop(this, 'fourteenDisabled');
-	});
+		$('#fifteen').bind('motion', function(){
+			sendToLoop(this, 15);
+		});
 
-	$('#fifteen').on('motion', function(){
-		sendToLoop(this, 'fifteenDisabled');
-	});
+		// $('#sixteen').bind('motion', function(){
+		// 	sendToLoop(this, 16);
+		// });
 
-	$('#pause').on('motion', function() {
-		if (pauseDisabled) return;
-		pauseDisabled = true;
-		pauseAll();
-		setTimeout(function() {
-			pauseDisabled = false;
-		}, 500);
-	});
+		// $('#seventeen').bind('motion', function(){
+		// 	sendToLoop(this, 17);
+		// });
 
-	// increase rate by 0.01 per motion event. Update global variable rate.
-	$('#faster').on('motion', function(){
-		var audios = document.getElementsByClassName('loop');
-		for (var i = 0; i < audios.length; i++) {
-			audios[i].playbackRate += 0.01;
-			rate = audios[i].playbackRate;
-			console.log('rate', audios[i].playbackRate);
-		}
-	});
+		// $('#eighteen').bind('motion', function(){
+		// 	sendToLoop(this, 18);
+		// });
 
-	// reduce rate by 0.01 per motion event. Update global variable rate.
-	$('#slower').on('motion', function(){
-		var audios = document.getElementsByClassName('loop');
-		for (var i = 0; i < audios.length; i++) {
-			audios[i].playbackRate -= 0.01;
-			console.log('rate', audios[i].playbackRate);
-		}
-	});
+		// $('#nineteen').bind('motion', function(){
+		// 	sendToLoop(this, 19);
+		// });
+
+		// $('#twenty').bind('motion', function(){
+		// 	sendToLoop(this, 20);
+		// });
+
+		// $('#twentyOne').bind('motion', function(){
+		// 	sendToLoop(this, 21);
+		// });
+
+		// $('#twentyTwo').bind('motion', function(){
+		// 	sendToLoop(this, 22);
+		// });
+
+		// $('#twentyThree').bind('motion', function(){
+		// 	sendToLoop(this, 23);
+		// });
+
+		// $('#twentyFour').bind('motion', function(){
+		// 	sendToLoop(this, 24);
+		// });
+
+		// $('#twentyFifth').bind('motion', function(){
+		// 	sendToLoop(this, 25);
+		// });
+
+		// $('#twentySix').bind('motion', function(){
+		// 	sendToLoop(this, 26);
+		// });
+
+		// $('#twentySeven').bind('motion', function(){
+		// 	sendToLoop(this, 27);
+		// });
+
+		// $('#twentyEight').bind('motion', function(){
+		// 	sendToLoop(this, 28);
+		// });
+
+		// $('#twentyNine').bind('motion', function(){
+		// 	sendToLoop(this, 29);
+		// });
+
+		// $('#thirty').bind('motion', function(){
+		// 	sendToLoop(this, 30);
+		// });
+
+		// $('#thirtyOne').bind('motion', function(){
+		// 	sendToLoop(this, 31);
+		// });
+
+		// $('#thirtyTwo').bind('motion', function(){
+		// 	sendToLoop(this, 32);
+		// });
+
+		// $('#thirtyThree').bind('motion', function(){
+		// 	sendToLoop(this, 33);
+		// });
+
+		// $('#thirtyFour').bind('motion', function(){
+		// 	sendToLoop(this, 34);
+		// });
+
+		// $('#thirtyfifth').bind('motion', function(){
+		// 	sendToLoop(this, 35);
+		// });
+
+		// $('#thirtySix').bind('motion', function(){
+		// 	sendToLoop(this, 36);
+		// });
+
+		// $('#thirtySeven').bind('motion', function(){
+		// 	sendToLoop(this, 37);
+		// });
+
+		// $('#thirtyEight').bind('motion', function(){
+		// 	sendToLoop(this, 38);
+		// });
+
+		// $('#thirtyNine').bind('motion', function(){
+		// 	sendToLoop(this, 39);
+		// });
+
+		// $('#fourty').bind('motion', function(){
+		// 	sendToLoop(this, 40);
+		// });
+
+		// $('#fourtyOne').bind('motion', function(){
+		// 	sendToLoop(this, 41);
+		// });
+
+		// $('#fourtyTwo').bind('motion', function(){
+		// 	sendToLoop(this, 42);
+		// });
+
+		// $('#fourtyThree').bind('motion', function(){
+		// 	sendToLoop(this, 43);
+		// });
+
+		// $('#fourtyFour').bind('motion', function(){
+		// 	sendToLoop(this, 44);
+		// });
+
+		// $('#fourtyFifth').bind('motion', function(){
+		// 	sendToLoop(this, 45);
+		// });
+
+		// $('#fourtySix').bind('motion', function(){
+		// 	sendToLoop(this, 46);
+		// });
+
+		// $('#fourtySeven').bind('motion', function(){
+		// 	sendToLoop(this, 47);
+		// });
+
+		// $('#fourtyEight').bind('motion', function(){
+		// 	sendToLoop(this, 48);
+		// });
+
+		// $('#fourtyNine').bind('motion', function(){
+		// 	sendToLoop(this, 49);
+		// });
 }
-
-
